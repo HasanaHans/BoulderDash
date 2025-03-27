@@ -14,6 +14,10 @@ public class Player extends Entity{
 
     public final int screenX;
     public final int screenY;
+    int hasKey = 0;
+    int standCounter = 0;
+    boolean moving = false;
+    int pixelCounter = 0;
 
 
 
@@ -23,10 +27,12 @@ public class Player extends Entity{
         screenX = gp.screenWidth/2 - (gp.tileSize/2);
         screenY = gp.screenHeight/2 - (gp.tileSize/2);
         solidArea = new Rectangle();
-        solidArea.x = 8;
-        solidArea.y = 16;
-        solidArea.width = 36;
-        solidArea.height = 32;
+        solidArea.x = 1;
+        solidArea.y = 1;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
+        solidArea.width = 46;
+        solidArea.height = 46;
         setDefaultValues();
         getPlayerImage();
 
@@ -53,48 +59,103 @@ public class Player extends Entity{
         }
     }
     public void update() {
-        if (keyH.upwards == true || keyH.downwards == true ||
-                keyH.leftwards == true || keyH.rightwards == true ) {
-            if (keyH.upwards == true){
-                direction = "up";
 
-            } else if (keyH.downwards) {
-                direction = "down";
+        if (moving == false) {
+            if (keyH.upwards == true || keyH.downwards == true ||
+                    keyH.leftwards == true || keyH.rightwards == true) {
+                if (keyH.upwards == true) {
+                    direction = "up";
 
-            } else if (keyH.leftwards) {
-                direction = "right";
+                } else if (keyH.downwards) {
+                    direction = "down";
 
-            } else if (keyH.rightwards) {
-                direction = "left";
+                } else if (keyH.leftwards) {
+                    direction = "right";
+
+                } else if (keyH.rightwards) {
+                    direction = "left";
+                }
+
+                moving = true;
+
+
+                // Check Tile Collision
+                collisionOn = false;
+                gp.cChecker.checkTile(this);
+                // Check Obj Collision
+                int objIndex = gp.cChecker.checkObject(this, true);
+                pickUpObject(objIndex);
+            } else {
+                standCounter++;
+                if (standCounter == 20) {
+                    spriteNum = 1;
+                    standCounter = 0;
+
+                }
             }
-            // Check Tile Collision
-            collisionOn = false;
-            gp.cChecker.checkTile(this);
+
+        }
+        if (moving == true) {
 
             // If collision == false, player can move.
 
-            if (collisionOn == false){
-                switch (direction){
-                    case "up": worldY -= speed; break;
-                    case "down":worldY+= speed;break;
-                    case "left": worldX-= speed;break;
-                    case "right":worldX+= speed;break;
-
+            if (collisionOn == false) {
+                switch (direction) {
+                    case "up":
+                        worldY -= speed;
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                    case "left":
+                        worldX -= speed;
+                        break;
+                    case "right":
+                        worldX += speed;
+                        break;
                 }
 
             }
             spriteCounter++;
-            if (spriteCounter >15){
-                if (spriteNum == 1){
+            if (spriteCounter > 15) {
+                if (spriteNum == 1) {
                     spriteNum = 2;
                 } else if (spriteNum == 2) {
                     spriteNum = 1;
                 }
                 spriteCounter = 0;
             }
-
+            pixelCounter += speed;
+            if (pixelCounter == 48){
+                moving = false;
+                pixelCounter = 0;
+            }
         }
     }
+
+
+
+
+
+
+
+
+
+
+    public void pickUpObject(int i){
+        if (i != 999){
+            String objectName = gp.obj[i].name;
+            switch (objectName){
+                case "Key":
+                    hasKey ++;
+                    gp.obj[i] = null;
+                    System.out.println("key: "  + hasKey);
+                break;
+            }
+        }
+
+    }
+
     public void draw(Graphics2D g2){
         BufferedImage image = null;
         switch (direction) {
