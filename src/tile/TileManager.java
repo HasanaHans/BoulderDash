@@ -1,9 +1,11 @@
 package tile;
 
 import main.GamePanel;
+import main.UtilityTool;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,35 +23,39 @@ public class TileManager {
         loadMap();
     }
     public void getTileImage( ){
-        try{
-            System.out.println("syate");
-
-            tile[1] = new Tile();
-            tile[1].image = ImageIO.read(getClass().getResourceAsStream("/tiles/earth.png"));
-
-            tile[0] = new Tile();
-            tile[0].image = ImageIO.read(getClass().getResourceAsStream("/tiles/boulder.png"));
-            tile[0].collision = true;
-
-            tile[2] = new Tile();
-            tile[2].image = ImageIO.read(getClass().getResourceAsStream("/tiles/wall.png"));
-            tile[2].collision = true;
-
-            tile[3] = new Tile();
-            tile[3].image = ImageIO.read(getClass().getResourceAsStream("/objects/key.png"));
-
-            tile[4] = new Tile();
-            tile[4].image = ImageIO.read(getClass().getResourceAsStream("/tiles/door_iron.png"));
-
-            tile[5] = new Tile();
-            tile[5].image = ImageIO.read(getClass().getResourceAsStream("/tiles/sand.png"));
-            System.out.println("finished");
 
 
-        }catch (IOException e){
+        setup(1, "earth", false);
+        setup(0, "boulder", true);
+        setup(2, "wall", true);
+        setup(3, "key", false);
+        setup(4, "door_iron", false);
+        setup(5, "sand", false);
+
+
+
+    }
+    public void setup(int index, String imageName, boolean collision) {
+        UtilityTool uTool = new UtilityTool();
+        try {
+            tile[index] = new Tile();
+
+            // Check if the resource exists
+            InputStream is = getClass().getClassLoader().getResourceAsStream("tiles/" + imageName + ".png");
+            if (is == null) {
+                System.out.println("Image not found: " + imageName + ".png");
+            } else {
+                tile[index].image = ImageIO.read(is);
+                tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
+                tile[index].collision = collision;
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+
     public void loadMap() {
         try {
             // Import the txt file
@@ -93,7 +99,7 @@ public class TileManager {
               worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
               worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
               worldY - gp.tileSize < gp.player.worldY + gp.player.screenY ){
-               g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);}
+               g2.drawImage(tile[tileNum].image, screenX, screenY, null);}
 
            worldCol++;
 
